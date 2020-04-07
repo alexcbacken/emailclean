@@ -1,19 +1,18 @@
-from datetime import datetime
 import email
+
+"""
+The decision has been made to keep the date as a string instead of a datetime obj. This is
+due to datetime's inability to be serialised, and the differing string formats from different
+servers. In the future this could be implemented using regex
+"""
 
 class Email():
     def __init__(self, uid, sender, date, subject, receiver):
         self.uid = uid
         self.sender = sender
-        self.date = self.date_to_date_obj(date)
+        self.date = date
         self.subject = subject
         self.receiver = receiver
-
-    def date_to_datetime(self, date):
-        if isinstance(date, str):
-            return datetime.strptime(date[0:16], "%a, %d %b %Y").date()
-        else:
-            return date
 
     @classmethod
     def from_dict(cls, dict):
