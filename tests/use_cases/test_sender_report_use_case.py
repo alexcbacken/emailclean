@@ -1,6 +1,7 @@
 import pytest
 from emailclean.use_cases import sender_list_use_case as sl
 from emailclean.domain import email as msg
+from emailclean.requests import db_request
 from unittest import mock
 
 @pytest.fixture
@@ -65,7 +66,9 @@ def test_sender_list_use_case(domain_email):
     repo = mock.Mock()
     repo.get.return_value =domain_email
 
-    sender_list_use_case = sl.
+    sender_list_use_case = sl.SenderListUseCase(repo)
+    request = db_request.DbReqObject()
+    response = sender_list_use_case.execute(request)
 
 
 

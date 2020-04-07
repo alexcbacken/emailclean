@@ -1,5 +1,5 @@
 import pytest
-from emailclean.requests import email_list_request as req
+from emailclean.requests import db_request as req
 
 def test_build_Db_request_no_parameters():
     request = req.DbReqObject()
