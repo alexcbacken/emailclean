@@ -7,12 +7,14 @@ servers. In the future this could be implemented using regex
 """
 
 class Email():
-    def __init__(self, uid, sender, date, subject, receiver):
+    def __init__(self, uid, sender, date, subject, receiver, read):
         self.uid = uid
         self.sender = sender
         self.date = date
         self.subject = subject
         self.receiver = receiver
+        self.read = read
+
 
     @classmethod
     def from_dict(cls, dict):
@@ -21,6 +23,7 @@ class Email():
         cls.date = dict["date"]
         cls.subject = dict["subject"]
         cls.receiver = dict["receiver"]
+        cls.read = dict["read"]
         return cls
 
 

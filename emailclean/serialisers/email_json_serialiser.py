@@ -14,11 +14,12 @@ class EmailJsonEncoder(json.JSONEncoder):
     def default(self, o):
         try:
             to_serialise = {
-                "uid": str(o.uid),
+                "uid": o.uid,
                 "sender": o.sender,
                 "date": o.date,
                 "subject": o.subject,
-                "receiver": o.receiver
+                "receiver": o.receiver,
+                "read": o.read
             }
             return to_serialise
         except AttributeError:
