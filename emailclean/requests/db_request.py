@@ -20,7 +20,7 @@ class ValidRequestObject:
     def __bool__(self):
         return True
 
-class DbReqObject(ValidRequestObject):
+class DbGetReqObject(ValidRequestObject):
 
     def __init__(self, type=None):
         self.type = type
