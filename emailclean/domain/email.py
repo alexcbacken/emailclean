@@ -2,7 +2,7 @@ import email
 
 """
 The decision has been made to keep the date as a string instead of a datetime obj. This is
-due to datetime's inability to be serialised, and the differing string formats from different
+due to datetime's inability to be serialised, and the potential differing string formats from different
 servers. In the future this could be implemented using regex
 """
 
@@ -25,6 +25,10 @@ class Email():
         cls.receiver = dict["receiver"]
         cls.read = dict["read"]
         return cls
+
+    @classmethod
+    def from_Imap_dict(cls,Imap_dict):
+        #returns a list of email, invoking from_dict once decoded.
 
 
 
