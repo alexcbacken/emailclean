@@ -1,20 +1,6 @@
 import pytest
-from emailclean.responses import db_response as res
-from emailclean.requests import db_request as req
-
-@pytest.fixture
-def response_value():
-    return {'key': ['value1', 'value2']}
-
-
-@pytest.fixture
-def response_type():
-    return 'ResponseError'
-
-
-@pytest.fixture
-def response_message():
-    return 'This is a response error'
+from emailclean.responses import response as res
+from emailclean.requests import request as req
 
 def test_response_success_is_true(response_value):
     assert bool(res.ResponseSuccess(response_value)) is True
@@ -46,7 +32,7 @@ def test_response_failure_contains_value(response_type, response_message):
         'type': response_type, 'message': response_message}
 
 
-def test_response_failure_initialisation_with_exception():
+def test_response_failure_initialisation_with_exception(response_type):
     response = res.ResponseFailure(
         response_type, Exception('Just an error message'))
 

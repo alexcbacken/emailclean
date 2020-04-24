@@ -1,7 +1,8 @@
 import pytest
 from emailclean.use_cases import db_get_use_case as db_lst
+from emailclean.requests import request as req
 
-from emailclean.requests import db_request
+from emailclean.requests import request
 from unittest import mock
 
 #fixture below is unneeded, but kept incase useful for future tests.
@@ -109,7 +110,7 @@ def test_sender_list_use_case(sender_list):
     repo.get.return_value =sender_list
 
     sender_list_use_case = db_lst.SenderListUseCase(repo)
-    request = db_request.DbGetReqObject(type="sender")
+    request = req.DbGetReqObject.build(type="sender")
     response = sender_list_use_case.execute(request)
 
     assert bool(request) is True
@@ -122,7 +123,7 @@ def test_delete_list_use_case(delete_list):
     repo.get.return_value =delete_list
 
     deleted_list_use_case = db_lst.DeleteListUseCase(repo)
-    request = db_request.DbGetReqObject(type="delete")
+    request = req.DbGetReqObject.build(type="delete")
     response = deleted_list_use_case.execute(request)
 
     assert bool(request) is True
@@ -135,13 +136,17 @@ def test_count_use_case(count):
     repo.get.return_value =count
 
     count_use_case = db_lst.CountUseCase(repo)
-    request = db_request.DbGetReqObject(type="count")
+    request = req.DbGetReqObject.build(type="count")
     response = count_use_case.execute(request)
 
     assert bool(request) is True
     assert bool(response) is True
     repo.get.assert_called_with(type="count")
     assert response.value == count
+
+
+
+
 
 
 

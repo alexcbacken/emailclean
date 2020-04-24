@@ -1,5 +1,5 @@
-from emailclean.requests.db_request import InvalidRequestObject
-from emailclean.responses import db_response as res
+from emailclean.requests.request import InvalidRequestObject
+from emailclean.responses import response as res
 
 
 class SenderListUseCase:

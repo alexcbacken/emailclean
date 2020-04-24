@@ -7,13 +7,14 @@ servers. In the future this could be implemented using regex
 """
 
 class Email():
-    def __init__(self, uid, sender, date, subject, receiver, read):
+    def __init__(self, uid, sender, date, subject, receiver, read, flags):
         self.uid = uid
         self.sender = sender
         self.date = date
         self.subject = subject
         self.receiver = receiver
         self.read = read
+        self.flags = flags
 
 
     @classmethod
@@ -24,11 +25,10 @@ class Email():
         cls.subject = dict["subject"]
         cls.receiver = dict["receiver"]
         cls.read = dict["read"]
+        cls.flags = dict["flags"]
         return cls
 
-    @classmethod
-    def from_Imap_dict(cls,Imap_dict):
-        #returns a list of email, invoking from_dict once decoded.
+
 
 
 
