@@ -4,34 +4,41 @@ from emailclean.requests import request as req
 
 def test_build_Imap_request_no_parameters():
     request = req.ImapReqObject.build()
-    assert isinstance(request, req.InvalidRequestObject) is True
-    assert request.errors == [{'parameter': 'type',
-                               'message': "type not specified try: ['delete', 'all', 'connect']"}]
+    assert request.has_errors() is True
+    assert request.errors == [{'message': 'invalid args: []  try: ["name=<class \'str\'>", "UIDs=<class '
+             '\'list\'>", "flags=<class \'list\'>"]',
+  'parameter': 'invalid args'}]
     assert bool(request) is False
 
-def test_build_Imap_request_incorrect_parameters():
-    request = req.ImapReqObject.build(type='incorrect')
-    assert isinstance(request, req.InvalidRequestObject) is True
-    assert request.errors == [{'message': "type=incorrect is invalid. try: ['delete', 'all', 'connect']",
-                               'parameter': 'type'}]
+def test_build_Imap_request_With_Incorrect_Value_types():
+    request = req.ImapReqObject.build(name=[], UIDs="big")
+    assert request.has_errors() is True
+    assert request.errors == [{'message': 'invalid args: [\'name=[]\', \'UIDs=big\']  try: ["name=<class '
+             '\'str\'>", "UIDs=<class \'list\'>", "flags=<class \'list\'>"]',
+  'parameter': 'invalid args'}]
+    assert bool(request) is False
+
+def test_build_Imap_request_With_Incorrect_Values():
+    request = req.ImapReqObject.build(name="", UIDs=[])
+    assert request.has_errors() is True
+    assert request.errors == [{'message': 'invalid args: [\'name=\', \'UIDs=[]\']  try: ["name=<class '
+             '\'str\'>", "UIDs=<class \'list\'>", "flags=<class \'list\'>"]',
+  'parameter': 'invalid args'}]
     assert bool(request) is False
 
 
-def test_build_Imap_request_connect():
-    request = req.ImapReqObject.build(type="connect")
-    assert request.type == "connect"
+
+def test_build_Imap_request_With_parameters():
+    request = req.ImapReqObject.build(UIDs=[1,2,3],name="mailbox")
+    assert request.fields == {'name': 'mailbox',
+                              'UIDs':[1,2,3]}
     assert bool(request) is True
 
 
-def test_build_Imap_request_delete():
-    request = req.ImapReqObject.build(type="delete")
-    assert request.type == "delete"
-    assert bool(request) is True
 
-def test_build_Imap_request_all():
-    request = req.ImapReqObject.build(type="all")
-    assert request.type == "all"
-    assert bool(request) is True
+
+
+
 
 
 

@@ -69,6 +69,91 @@ def msg_list():
         ]
 
 
+def test_Imap_Fetch_Use_Case(msg_list):
+    imap_client = mock.Mock()
+    imap_client.fetch.return_value = msg_list
+    mailbox="inbox"
+    Imap_fetch_UC = imapUC.ImapFetchUseCase(imap_client)
+    request = req.ImapReqObject.build(name=mailbox)
+    response = Imap_fetch_UC.execute(request)
+    assert bool(request) is True
+    assert bool(response) is True
+    imap_client.fetch.assert_called_with(mailbox)
+    for msg in response.value:
+        assert isinstance(msg, type(Email))
+
+def test_Imap_Delete_Use_Case(uid_list, expunge_list):
+    imap_client = mock.Mock()
+    imap_client.delete.return_value = expunge_list
+    mailbox = "inbox"
+
+    Imap_delete_UC = imapUC.ImapDeleteUseCase(imap_client)
+    request = req.ImapReqObject.build(UIDs=uid_list, name=mailbox)
+    response = Imap_delete_UC.execute(request)
+    imap_client.delete.assert_called_with(mailbox, uid_list)
+    assert imap_client.delete.called is True
+    assert bool(request) is True
+    assert bool(response) is True
+
+    assert response.value == [20, 40, 50, 60, 45, 56423]
+
+def test_Imap_Create_New_Mailbox_Use_Case():
+    imap_client = mock.Mock()
+    imap_client.new_mb.return_value = ("ok", [])
+    mailbox = "Jerry_2020"
+    Imap_create_mb_UC = imapUC.ImapCreateNewMailboxUseCase(imap_client)
+    request = req.ImapReqObject.build(name=mailbox)
+    response = Imap_create_mb_UC.execute(request)
+    imap_client.new_mb.assert_called_with(mailbox)
+    assert bool(request) is True
+    assert bool(response) is True
+    assert response.value == ("ok", [])
+
+def test_Imap_Create_New_Folder_Use_Case():
+    imap_client = mock.Mock()
+    imap_client.new_folder.return_value = ("ok", [])
+    folder = "Jerry_2020"
+    Imap_new_folder_UC = imapUC.ImapCreateNewFolderUseCase(imap_client)
+    request = req.ImapReqObject.build(name=folder)
+    response = Imap_new_folder_UC.execute(request)
+    imap_client.new_folder.assert_called_with(folder)
+    assert bool(request) is True
+    assert bool(response) is True
+    assert response.value == ("ok", [])
+
+def test_Imap_Mark_As_Use_Case():
+    imap_client = mock.Mock()
+    imap_client.mark_as.return_value = ("ok", [])
+    UIDs = [200,]
+    flags = ['seen',]
+    mailbox = 'inbox'
+    Imap_mark_as_UC = imapUC.ImapMarkAsUseCase(imap_client)
+    request = req.ImapReqObject.build(UIDs=UIDs, flags=flags, name=mailbox)
+    response = Imap_mark_as_UC.execute(request)
+    imap_client.mark_as.assert_called_with(mailbox, flags, UIDs)
+    assert bool(request) is True
+    assert bool(response) is True
+    assert response.value == ("ok", [])
+
+def test_Imap_Move_To():
+    imap_client = mock.Mock()
+    imap_client.move_to.return_value = ("ok", [])
+    UIDs = [200, ]
+    mailbox = 'inbox'
+    Imap_move_to_UC = imapUC.ImapMoveToUseCase(imap_client)
+    request = req.ImapReqObject.build(name=mailbox, UIDs=UIDs)
+    response = Imap_move_to_UC.execute(request)
+    imap_client.move_to.assert_called_with(mailbox, UIDs)
+    assert bool(request) is True
+    assert bool(response) is True
+    assert response.value == ("ok", [])
+
+
+
+
+"""
+keep as you could use to helb build you rmore complicated use cases
+
 def test_Imap_Delete_From_Db_Use_Case(uid_list, expunge_list):
     db = mock.Mock()
     imap_client= mock.Mock()
@@ -83,7 +168,7 @@ def test_Imap_Delete_From_Db_Use_Case(uid_list, expunge_list):
     assert bool(response) is True
     assert db.get_delete_list.called is True
     assert response.value == [20,40,50,60,45,56423]
-
+    
 
 
 
@@ -103,7 +188,7 @@ def test_Imap_Connect_Use_Case(msg_list):
     db.get.assert_called_with(type="count")
     assert response.value == 'inbox added to db, db length is 7'
 
-    #
+
 
 def test_Imap_all_Use_Case(msg_list):
     imap_client= mock.Mock()
@@ -118,6 +203,14 @@ def test_Imap_all_Use_Case(msg_list):
     for msg in response.value:
         assert isinstance(msg, type(Email))
 
+
+
+
+
+def test_Imap_Create_New_Folder_Use_Case()
+
+def test_Imap_Mark_As_Use_Case()
+"""
 
 
 
