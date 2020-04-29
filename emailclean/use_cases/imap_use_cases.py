@@ -25,7 +25,7 @@ class ImapFetchUseCase:
 
 
 class ImapDeleteUseCase:
-#(given list of uid and mailbox name)
+
     def __init__(self, imap_client):
         self.imap_client = imap_client
 
@@ -59,6 +59,7 @@ class ImapCreateNewMailboxUseCase:
 
 
 class ImapCreateNewFolderUseCase:
+
     def __init__(self, imap_client):
         self.imap_client = imap_client
 

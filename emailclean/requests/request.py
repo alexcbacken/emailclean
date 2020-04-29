@@ -1,9 +1,11 @@
+from emailclean.domain.email import Email
+
 class InvalidRequestObject:
     def __init__(self):
-        self.errors = []
+        self.errors = {}
 
-    def add_error(self, parameter, message):
-        self.errors.append({'parameter': parameter, 'message': message})
+    def add_error(self, error:tuple):
+        self.errors.update({'parameter': error[0], 'problem': error[1]})
 
     def has_errors(self):
         return len(self.errors) > 0
@@ -23,45 +25,67 @@ class ValidRequestObject:
     def build(cls, **fields):
         invalid_req = InvalidRequestObject()
         if hasattr(cls, "accepted_req"):
-            if not cls.validate_fields(fields):
-                err_message = f'invalid args: {[x[0] + "=" +str(x[1]) for x in fields.items()]}  ' \
-                              f'try: {[str(x[0]) + "="+str(x[1]) for x in cls.accepted_req.items()]}'
-                invalid_req.add_error('invalid args', err_message)
+            validated = cls.validate_fields(fields)
+            if not validated[0]:
+                err_message = validated[1]
+                invalid_req.add_error(err_message)
                 return invalid_req
 
         return cls(**fields)
 
-    def validate_fields(self, adict):
-        pass
+    @classmethod
+    def validate_fields(cls, adict):
+        validation = True
+        error_msg = ""
+        if adict:
+            try:
+                for key, value in adict.items():
+                    if not isinstance(value, cls.accepted_req.get(key)):
+                        validation = False
+                        error_msg = (key, f"incorrect type try {cls.accepted_req[key]}")
+            except KeyError as e:
+                validation = False
+                error_msg = (key, "incorrect arg value")
+            except TypeError as e:
+                validation = False
+                error_msg = (key, "incorrect arg value")
 
+        return (validation, error_msg)
 
     def __bool__(self):
         return True
 
+class DbRequestObject(ValidRequestObject):
 
-class DbGetReqObject(ValidRequestObject):
+        # should be an iterator containing these items
+        accepted_req = {"msgs": list,
+                        "flags": list,
+                        "UIDs": list,
+                        "name": str}
+
+class DbGetReqObject(DbRequestObject):
 
     # a accepted kwarg dict. key word is the key. accepted
     # values are accepted values
-    accepted_req = {'type': ['sender', 'all', 'delete']}
+    accepted_req = {'get': ['sender', 'all', 'delete'],}
 
+    #TODO change to return custom error msg
     @classmethod
     def validate_fields(cls, adict):
+        validation = True
+        error_msg = ""
         if not adict:
-            return False
+            validation = False
+            error_msg = ("kwargs", "none passed")
         for key in adict:
             try:
                 if adict[key] not in cls.accepted_req[key]:
-                    return False
-            except KeyError:
-                return False
-        return True
-
-
-
-
-
-
+                    validation = False
+                    error_msg = (adict[key], "not an expected argument")
+            except [KeyError, TypeError] as e:
+                validation = False
+                error_msg = (key, str(e))
+        return (validation, error_msg)
 
 class ImapReqObject(ValidRequestObject):
 
@@ -69,18 +93,8 @@ class ImapReqObject(ValidRequestObject):
                     'UIDs': list,
                     'flags': list}
 
-    @classmethod
-    def validate_fields(cls, adict):
-        result = False
-        try:
-            for key in adict:
-                #check name is correct type, with a length
-                if (isinstance(adict[key], cls.accepted_req[key]) and bool(len(adict[key]))):
-                    result = True
-        except KeyError:
-            result = False
 
-        return result
+
 
 
 

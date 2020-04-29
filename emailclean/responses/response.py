@@ -14,9 +14,7 @@ class ResponseFailure:
 
     @classmethod
     def build_from_invalid_request_object(cls, req):
-        error_msg = ""
-        for errors in req.errors:
-            error_msg += f"parameter: {errors['parameter']}, message: {errors['message']}\n"
+        error_msg = req.errors
         return cls(cls.PARAMETERS_ERROR, error_msg)
 
     @property

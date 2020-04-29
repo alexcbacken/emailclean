@@ -51,15 +51,13 @@ def test_response_failure_from_empty_invalid_request_object():
 
 def test_response_failure_from_invalid_request_object_with_errors():
     request_object = req.InvalidRequestObject()
-    request_object.add_error('path', 'Is mandatory')
-    request_object.add_error('path', "can't be blank")
-
+    request_object.add_error(('path', 'Is mandatory'))
     response = res.ResponseFailure.build_from_invalid_request_object(
         request_object)
 
     assert bool(response) is False
     assert response.type == res.ResponseFailure.PARAMETERS_ERROR
-    assert response.message == "parameter: path, message: Is mandatory\nparameter: path, message: can't be blank\n"
+    assert response.message == {'parameter': 'path', 'problem': 'Is mandatory'}
 
 
 def test_response_failure_build_resource_error():
