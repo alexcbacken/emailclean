@@ -1,15 +1,17 @@
 import pytest
-import imaplib, threading, sys, localmail_imap,
+import imaplib, threading, sys, localmail_imap
 from os import path
 from twisted.logger import Logger, textFileLogObserver
+
+pytestmark = pytest.mark.imap_server
 
 HOST = 'imap.gmail.com'
 EMAIL = 'someemail@gmail.com'
 PASSWORD = "somepassword"
 MAILBOX = "INBOX"
 
-@pytest.fixture(scope='session')
-def imap_mock:
+@pytest.fixture(scope='function')
+def imap_mock():
     observer = textFileLogObserver(sys.stdout)
     logStdout = Logger(observer=observer)
 
@@ -29,8 +31,9 @@ def imap_mock:
 
     return result, data
 
-@pytest.fixture(scope=session):
+@pytest.fixture(scope='session')
 def mbox_mails():
+    pass
     #fixture to return hard wired mail box for testing purposes
 
 

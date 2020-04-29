@@ -4,9 +4,8 @@ from emailclean.requests import request as req
 
 def test_build_Imap_request_no_parameters():
     request = req.ImapReqObject.build()
-    assert request.has_errors() is True
-    assert request.errors == {'parameter': 'kwargs', 'problem': 'none passed'}
-    assert bool(request) is False
+    assert bool(request.fields) is False
+    assert bool(request) is True
 
 def test_build_Imap_request_With_Incorrect_Value_types():
     request = req.ImapReqObject.build(name=[], UIDs="big")

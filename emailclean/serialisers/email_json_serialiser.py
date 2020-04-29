@@ -19,7 +19,8 @@ class EmailJsonEncoder(json.JSONEncoder):
                 "date": o.date,
                 "subject": o.subject,
                 "receiver": o.receiver,
-                "read": o.read
+                "read": o.read,
+                "flags": o.flags
             }
             return to_serialise
         except AttributeError:

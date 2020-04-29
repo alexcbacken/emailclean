@@ -10,3 +10,4 @@ def pytest_runtest_setup(item):
         pytest.skip("need --imap_server option to run")
     if 'postgres' in item.keywords and not item.config.getvalue("postgres"):
         pytest.skip("need --postgres option to run")
+
