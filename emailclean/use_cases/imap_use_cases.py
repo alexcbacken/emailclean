@@ -1,7 +1,19 @@
 from emailclean.requests.request import InvalidRequestObject
 from emailclean.responses import response as res
 from emailclean.domain import email
+from emailclean.servers import imap_server
 
+class ImapConnectUseCase:
+
+    def execute(self, request):
+        if type(request) is InvalidRequestObject:
+            return res.ResponseFailure.build_from_invalid_request_object(request)
+        try:
+            imap_client = imap_server.Imap_client(request.fields)
+            imap_connection= imap_client.connect()
+        except Exception as e:
+            return res.ResponseFailure.build_system_error(f"{e.__class__.__name__}: {e}")
+        return res.ResponseSuccess(imap_connection)
 
 class ImapFetchUseCase:
 

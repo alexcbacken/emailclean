@@ -3,6 +3,7 @@ from emailclean.requests import request as req
 from emailclean.responses import response as res
 from emailclean.use_cases import imap_use_cases as imapUC
 from emailclean.domain.email import Email
+from emailclean.servers import imap_server
 from unittest import mock,TestCase
 
 #fake results, data return list:
@@ -67,6 +68,35 @@ def msg_list():
          "read": False,
          "flags": "//seen"}
         ]
+@pytest.fixture()
+def connection_dict():
+    return {"host":"localhost",
+            "port": "1234",
+            "user": "emailclean",
+            "password": "dingy",
+            "SSL": "False",
+            "mailbox": "INBOX"}
+
+
+def test_Imap_Connect(connection_dict):
+    imap_client = mock.Mock()
+    imap_server = mock.Mock()
+    imap_server.Imap_client.return_value = imap_server.Imap_client.__init__()
+    imap_client.connect.return_value = imap_server.Imap_client
+    Imap_connect_UC = imapUC.ImapConnectUseCase()
+    request = req.ImapReqObject.build(conn=connection_dict)
+    response = Imap_connect_UC.execute(request)
+    assert bool(request) is True
+    assert bool(response) is True
+    assert isinstance(response.value, type(imap_server.Imap_client))
+
+
+
+
+def test_Imap_close_Use_Case():
+    #take imap_client can call .close()
+    pass
+
 
 
 def test_Imap_Fetch_Use_Case(msg_list):

@@ -18,6 +18,8 @@ class ValidRequestObject:
     # you will need a @class method
     # def from dict in here, so this can become the base class
     # for all your requests
+    accepted_req = {}
+
     def __init__(self, **fields):
         self.fields = fields
 
@@ -61,7 +63,8 @@ class DbRequestObject(ValidRequestObject):
         accepted_req = {"msgs": list,
                         "flags": list,
                         "UIDs": list,
-                        "name": str}
+                        "name": str,
+                        "conn": dict}
 
 class DbGetReqObject(DbRequestObject):
 
