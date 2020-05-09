@@ -4,7 +4,8 @@ from emailclean.responses import response as res
 from emailclean.use_cases import imap_use_cases as imapUC
 from emailclean.domain.email import Email
 from emailclean.servers import imap_server
-from unittest import mock,TestCase
+from unittest import mock
+
 
 #fake results, data return list:
 @pytest.fixture()
@@ -77,25 +78,23 @@ def connection_dict():
             "SSL": "False",
             "mailbox": "INBOX"}
 
-
-def test_Imap_Connect(connection_dict):
-    imap_client = mock.Mock()
-    imap_server = mock.Mock()
-    imap_server.Imap_client.return_value = imap_server.Imap_client.__init__()
-    imap_client.connect.return_value = imap_server.Imap_client
+@mock.patch.object(imap_server.ImapClient, 'connect')
+def test_Imap_Connect(imap_mock_conn, connection_dict):
     Imap_connect_UC = imapUC.ImapConnectUseCase()
     request = req.ImapReqObject.build(conn=connection_dict)
     response = Imap_connect_UC.execute(request)
     assert bool(request) is True
     assert bool(response) is True
-    assert isinstance(response.value, type(imap_server.Imap_client))
-
-
-
+    assert imap_mock_conn.called
 
 def test_Imap_close_Use_Case():
-    #take imap_client can call .close()
-    pass
+    imap_client = mock.Mock()
+    Imap_close_UC = imapUC.ImapCloseUseCase(imap_client)
+    request = req.ImapReqObject.build()
+    response = Imap_close_UC.execute(request)
+    assert bool(request) is True
+    assert bool(response) is True
+    assert imap_client.close.called
 
 
 

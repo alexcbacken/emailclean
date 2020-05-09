@@ -1,7 +1,7 @@
 from emailclean.requests.request import InvalidRequestObject
 from emailclean.responses import response as res
 from emailclean.domain import email
-from emailclean.servers import imap_server
+from emailclean.servers.imap_server import ImapClient
 
 class ImapConnectUseCase:
 
@@ -9,11 +9,26 @@ class ImapConnectUseCase:
         if type(request) is InvalidRequestObject:
             return res.ResponseFailure.build_from_invalid_request_object(request)
         try:
-            imap_client = imap_server.Imap_client(request.fields)
-            imap_connection= imap_client.connect()
+            imap_client = ImapClient.connect(request.fields.get('conn'))
         except Exception as e:
             return res.ResponseFailure.build_system_error(f"{e.__class__.__name__}: {e}")
-        return res.ResponseSuccess(imap_connection)
+        return res.ResponseSuccess(imap_client)
+
+class ImapCloseUseCase:
+
+    def __init__(self, imap_client):
+        self.imap_client = imap_client
+
+
+    def execute(self, request):
+        if type(request) is InvalidRequestObject:
+            return res.ResponseFailure.build_from_invalid_request_object(request)
+        try:
+            self.imap_client.close()
+        except Exception as e:
+            # TODO: add key error handeling (.from_dict method),
+            return res.ResponseFailure.build_system_error(f"{e.__class__.__name__}: {e}")
+        return res.ResponseSuccess()
 
 class ImapFetchUseCase:
 
@@ -22,6 +37,11 @@ class ImapFetchUseCase:
 
 
     def execute(self, request):
+        """
+        executes a fetch command on the imap_client
+        :param request: emailclean.requests.ImapReqObject
+        :return: list of EMail objects (emailclean.domain.email.Email)
+        """
         email_list = []
         if type(request) is InvalidRequestObject:
             return res.ResponseFailure.build_from_invalid_request_object(request)

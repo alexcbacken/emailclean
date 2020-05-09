@@ -64,7 +64,7 @@ class DbRequestObject(ValidRequestObject):
                         "flags": list,
                         "UIDs": list,
                         "name": str,
-                        "conn": dict}
+                        }
 
 class DbGetReqObject(DbRequestObject):
 
@@ -94,7 +94,8 @@ class ImapReqObject(ValidRequestObject):
 
     accepted_req = {'name': str,
                     'UIDs': list,
-                    'flags': list}
+                    'flags': list,
+                    "conn": dict}
 
 
 
