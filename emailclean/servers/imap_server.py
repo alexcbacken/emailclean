@@ -3,7 +3,7 @@ import email
 import re
 
 
-FLAGS_RE_DICT= {
+MSG_FLAGS_RE_DICT= {
     'localhost': r'FLAGS \((?P<FLAGS>.*?)\)',
     'imap.gmail.com': r'FLAGS \((?P<FLAGS>.*?)\)'
 }
@@ -12,6 +12,13 @@ UID_RE_DICT= {
     'localhost': r"UID\s(?P<UID>\d+)",
     'imap.gmail.com': r"UID\s(?P<UID>\d+)"
 }
+# re string for extracting flags from PERMANENTFLAGS response code
+SERVER_FLAGS_RE_DICT={
+    'localhost': r'\[A-Za-z]*',
+    'imap.gmail.com': r'\\[A-Za-z]*'
+}
+#supported flags
+
 
 class ImapClient():
 
@@ -20,6 +27,9 @@ class ImapClient():
     def __init__(self, conn_dict, connection):
         self.conn_dict = conn_dict
         self.connection = connection
+
+
+
 
     @classmethod
     def connect(cls, conn_dict):
@@ -74,13 +84,34 @@ class ImapClient():
 
         return msg_list
 
+    def delete(self, mailbox):
+
+        """should expunge mailbox. messages to be deleted have been flagged
+        in the db. must be called after self.mark_as() otherwise, msgs in db marked
+        as Deleted, won't on be on the imap server yet."""
+        try:
+            self.connection.select(mailbox=mailbox)
+            result, data = self.connection.expunge()
+            if len(data) == 0:
+                raise ValueError('no messages flagged to be deleted run mark_as() first')
+        except Exception as e:
+            raise e
+        return type, data
+
+
+    def supported_flags(self):
+        result = self.connection.response('PERMANENTFLAGS')
+        flags_str = result[1][0].decode()
+        match = re.findall(SERVER_FLAGS_RE_DICT[self.conn_dict.get('host')], flags_str)
+        return match
+
     def _get_flags(self, fields_str):
         """
         return flags given a byte string from imap server
         :param flag_str: the string returned from the imap server
         :return: a string with flags seperated by "~" ie "Seen~Answered~deleted"
         """
-        regex = re.compile(FLAGS_RE_DICT[self.conn_dict.get('host', 'default')])
+        regex = re.compile(MSG_FLAGS_RE_DICT[self.conn_dict.get('host', 'default')])
         match = regex.search(fields_str)
         flags = match.groups('FLAGS')[0]
         if flags:

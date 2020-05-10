@@ -28,6 +28,9 @@ class Email():
         cls.flags = dict["flags"]
         return cls
 
+    def as_msg_obj(self):
+        raise NotImplementedError('you need to write this!!')
+
 
 
 

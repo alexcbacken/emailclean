@@ -27,8 +27,13 @@ FILE_LIST = []
 # the actual code gets mocked. I think it it esentially only the
 # imablib.IMAP4(host=, port=) that will have to be patched in.
 
+
+@pytest.fixture(scope='function')
+def UIDs():
+    return [1,2,3,4]
+
 @pytest.fixture(scope='module')
-def start_imap_sever():
+def start_localmail():
     observer = textFileLogObserver(sys.stdout)
     logStdout = Logger(observer=observer)
     # todo: update the file string below. should use abspath and link into set up above
@@ -45,7 +50,7 @@ def start_imap_sever():
     # shut down locla imap server
     localmail_imap.shutdown_thread(thread)
     # delete temp mbox files
-    #[os.remove(x) for x in FILE_LIST]
+    [os.remove(x) for x in FILE_LIST]
 
 @pytest.fixture(scope='function')
 def set_mailbox():
@@ -63,16 +68,22 @@ def set_mailbox():
 
 
 
+
+
+
+
+
+
 @pytest.fixture(scope='function')
 def imap_client(connection_dict):
     imap_client = ImapClient.connect(connection_dict)
     return imap_client
 
 
-def test_imap_server_connect(connection_dict,start_imap_sever):
+def test_imap_server_connect(connection_dict, start_localmail):
 
     imapUC = Imap.ImapConnectUseCase()
-    request = req.ImapReqObject(conn=connection_dict)
+    request = req.ImapReqObject.build(conn=connection_dict)
     response = imapUC.execute(request)
     imap_conn = response.value
     assert bool(request) is True
@@ -81,11 +92,19 @@ def test_imap_server_connect(connection_dict,start_imap_sever):
     assert imap_conn.connection.noop() == ('OK', [b'NOOP No operation performed'])
     imap_conn.connection.close()
 
+def test_conn_refused_raises_system_error(connection_dict):
+    imapUC = Imap.ImapConnectUseCase()
+    # set incorrect port
+    connection_dict['port'] = 9999
+    request = req.ImapReqObject.build(conn=connection_dict)
+    response = imapUC.execute(request)
+    assert bool(request) is True
+    assert bool(response) is False
+    assert response.type == 'SystemError'
 
-def test_imap_server_fetch(imap_client, set_mailbox):
-
+def test_imap_server_fetch(imap_client):
     imapUC = Imap.ImapFetchUseCase(imap_client)
-    request = req.ImapReqObject(name="inbox")
+    request = req.ImapReqObject.build(name="inbox")
     response = imapUC.execute(request)
     assert bool(request) is True
     assert bool(response) is True
@@ -97,24 +116,30 @@ def test_imap_server_fetch(imap_client, set_mailbox):
     #test sone values here for the returned emails
 
 
+
+
+# test is skipped as methods to update imap server
+# from db are required for implementation.
+@pytest.mark.skip
+def test_imap_server_delete(imap_client, set_mailbox):
+    imapUC = Imap.ImapDeleteUseCase(imap_client)
+    request = req.ImapReqObject.build(name="inbox")
+    response = imapUC.execute(request)
+    assert bool(request) is True
+    assert bool(response) is True
+    assert len(response.value) == 2
+
+def test_imap_mark_as(imap_client, set_mailbox):
+#self.imap_client.mark_as(mailbox, flags, UIDs)
+
+
+
+
+
+
+
+
 """
-def test_conn_refused_raises_invalid_response()
-"""
-"""
-localmail_imap.shutdown_thread(thread)
-"""
-
-
-
-
-
-
-
-"""
-msg_list = self.imap_client.fetch(request.fields.get('name'))
-
-result = self.imap_client.delete(mailbox, UIDs)
-
 result = self.imap_client.new_mb(mailbox)
 
 result = self.imap_client.new_folder(folder)

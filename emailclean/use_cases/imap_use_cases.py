@@ -65,9 +65,8 @@ class ImapDeleteUseCase:
         if type(request) is InvalidRequestObject:
             return res.ResponseFailure.build_from_invalid_request_object(request)
         try:
-            UIDs = request.fields.get('UIDs')
             mailbox = request.fields.get('name')
-            result = self.imap_client.delete(mailbox, UIDs)
+            result = self.imap_client.delete(mailbox)
         except Exception as e:
             return res.ResponseFailure.build_system_error(f"{e.__class__.__name__}: {e}")
         return res.ResponseSuccess(result)
