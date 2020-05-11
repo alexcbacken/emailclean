@@ -66,22 +66,12 @@ def set_mailbox():
 
     localmail_imap.imap.INBOX.setFile(mb_temp._path)
 
-
-
-
-
-
-
-
-
 @pytest.fixture(scope='function')
 def imap_client(connection_dict):
     imap_client = ImapClient.connect(connection_dict)
     return imap_client
 
-
 def test_imap_server_connect(connection_dict, start_localmail):
-
     imapUC = Imap.ImapConnectUseCase()
     request = req.ImapReqObject.build(conn=connection_dict)
     response = imapUC.execute(request)
@@ -91,6 +81,7 @@ def test_imap_server_connect(connection_dict, start_localmail):
     assert isinstance(imap_conn, ImapClient)
     assert imap_conn.connection.noop() == ('OK', [b'NOOP No operation performed'])
     imap_conn.connection.close()
+
 
 def test_conn_refused_raises_system_error(connection_dict):
     imapUC = Imap.ImapConnectUseCase()
@@ -102,7 +93,8 @@ def test_conn_refused_raises_system_error(connection_dict):
     assert bool(response) is False
     assert response.type == 'SystemError'
 
-def test_imap_server_fetch(imap_client):
+
+def test_imap_server_fetch(imap_client, set_mailbox):
     imapUC = Imap.ImapFetchUseCase(imap_client)
     request = req.ImapReqObject.build(name="inbox")
     response = imapUC.execute(request)
@@ -112,16 +104,15 @@ def test_imap_server_fetch(imap_client):
     assert len(response.value) == 4
     for msg in response.value:
         assert isinstance(msg, type(Email))
-    imap_client.connection.close()
-    #test sone values here for the returned emails
 
 
+def test_imap_server_delete(imap_client, set_mailbox, UIDs):
+    # mark 2 messages for deletion
+    flags = '\\Deleted'
+    for uid in UIDs:
+        if (uid == 1) or (uid == 2):
+            result, data = imap_client.connection.store(str(uid).encode(), 'FLAGS', flags)
 
-
-# test is skipped as methods to update imap server
-# from db are required for implementation.
-@pytest.mark.skip
-def test_imap_server_delete(imap_client, set_mailbox):
     imapUC = Imap.ImapDeleteUseCase(imap_client)
     request = req.ImapReqObject.build(name="inbox")
     response = imapUC.execute(request)
@@ -129,22 +120,32 @@ def test_imap_server_delete(imap_client, set_mailbox):
     assert bool(response) is True
     assert len(response.value) == 2
 
-def test_imap_mark_as(imap_client, set_mailbox):
-#self.imap_client.mark_as(mailbox, flags, UIDs)
 
+def test_imap_mark_as(imap_client, set_mailbox, UIDs):
+    flags = '\\Deleted'
+    imapUC = Imap.ImapMarkAsUseCase(imap_client)
+    request = req.ImapReqObject.build(name="inbox", flags=flags, UIDs=UIDs)
+    response = imapUC.execute(request)
+    assert bool(request) is True
+    assert bool(response) is True
+    assert len(response.value) == 4
+    for item in response.value:
+        assert item[0] in UIDs
+        assert '\\Deleted' in item[1]
 
+def test_imap_new_mb(imap_client, set_mailbox):
+    imapUC = Imap.ImapCreateNewMailboxUseCase(imap_client)
+    request = req.ImapReqObject.build(name="MyBox")
+    response = imapUC.execute(request)
+    assert bool(request) is True
+    assert bool(response) is True
+    assert response.value == 'Success'
 
-
-
-
-
-
-"""
-result = self.imap_client.new_mb(mailbox)
-
-result = self.imap_client.new_folder(folder)
-
-result = self.imap_client.mark_as(mailbox, flags, UIDs)
-
-result = self.imap_client.move_to(mailbox, UIDs)
-"""
+def test_imap_move_to(imap_client,set_mailbox, UIDs):
+    # localmail does not implement the copy() command
+    # so this test will result in a False response
+    imapUC = Imap.ImapMoveToUseCase(imap_client)
+    request = req.ImapReqObject.build(name="MyBox", UIDs=UIDs)
+    response = imapUC.execute(request)
+    assert bool(request) is True
+    assert bool(response) is False

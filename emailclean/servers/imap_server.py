@@ -4,7 +4,7 @@ import re
 
 
 MSG_FLAGS_RE_DICT= {
-    'localhost': r'FLAGS \((?P<FLAGS>.*?)\)',
+    'localhost': r'FLAGS r\((?P<FLAGS>.*?)\)',
     'imap.gmail.com': r'FLAGS \((?P<FLAGS>.*?)\)'
 }
 
@@ -86,9 +86,13 @@ class ImapClient():
 
     def delete(self, mailbox):
 
-        """should expunge mailbox. messages to be deleted have been flagged
-        in the db. must be called after self.mark_as() otherwise, msgs in db marked
-        as Deleted, won't on be on the imap server yet."""
+        """
+        expunge mailbox. messages to be deleted must have been flagged
+        in the db, and flags updated on the imap server before this method is called
+        otherwise it will raise an ValueError Exception
+        :param mailbox: str: name on mailbox. ie 'inbox' or 'sent'
+        :return: a list of UIDs that have been deleted
+        """
         try:
             self.connection.select(mailbox=mailbox)
             result, data = self.connection.expunge()
@@ -96,10 +100,74 @@ class ImapClient():
                 raise ValueError('no messages flagged to be deleted run mark_as() first')
         except Exception as e:
             raise e
-        return type, data
+        return data
 
+    def mark_as(self, mailbox:str, flags:str, UIDs:list):
+        """
+        Replace all flags in message with flags in flags string.
+        :param mailbox: name on mailbox. ie 'inbox' or 'sent'
+        :param flags: string of flags to be added, seperated by '~'
+        :param UIDs: list of message UIDs that flag will be added to
+        :returns a list of (UID, Flags_set) tuples
+        """
+        try:
+            # replace ~ in flag string with a single slash and whitespace.
+            flags = flags.replace("~", " \\")
+            return_list = []
+            self.connection.select(mailbox=mailbox)
+            for uid in UIDs:
+
+                # 'FLAGS' is used instead of '+FLAGS' to prevent the need
+                # to maintain info on which emails have had which flags changed
+                # all flags are always replaced with flags in db storage
+                result, data = self.connection.store(str(uid).encode(), 'FLAGS', flags)
+                return_data = data[0].decode()
+                return_list.append((uid, return_data))
+        except Exception as e:
+            raise e
+        return return_list
+
+    def new_mb(self, mailbox:str):
+        """
+        create a new mailbox on the server. use to create chrildren boxes also
+        ie 'higherMailBox/subMailBox'
+        :param mailbox: Name for new mailbox
+        :return: ValueError if name already in use, otherwise 'Success'
+        """
+        try:
+            result, data = self.connection.create(mailbox)
+            if result != 'OK':
+                raise ValueError('Could not create mailbox, name probably already exists')
+        except Exception as e:
+            raise e
+        return 'Success'
+
+    def move_to(self, mailbox:str, UIDs:list):
+        """
+
+        :param mailbox: Name for destination mailbox. include parent mailboxes also
+        ie 'higherMailBox/subMailBox'
+        :param UIDs: list of message UIDs that will be moved
+        :return: a list of (UID, destination) tuples. a Value error is raised
+        if destination mailbox does not exist
+        """
+        return_list = []
+        try:
+            for uid in UIDs:
+                result, data = self.connection.copy(str(uid).encode(), mailbox)
+                if result != 'OK':
+                    raise ValueError(f'move unsuccessful check {mailbox} exists')
+                return_data = data[0].decode()
+                return_list.append((uid, return_data))
+        except Exception as e:
+            raise e
+        return return_list
 
     def supported_flags(self):
+        """
+        get a list of flags that client can change permanently
+        :return: a list of flag strings. ie \\Answered
+        """
         result = self.connection.response('PERMANENTFLAGS')
         flags_str = result[1][0].decode()
         match = re.findall(SERVER_FLAGS_RE_DICT[self.conn_dict.get('host')], flags_str)
@@ -109,12 +177,13 @@ class ImapClient():
         """
         return flags given a byte string from imap server
         :param flag_str: the string returned from the imap server
-        :return: a string with flags seperated by "~" ie "Seen~Answered~deleted"
+        :return: a string with flags seperated by "~" ie "Seen~Answered~Deleted"
         """
         regex = re.compile(MSG_FLAGS_RE_DICT[self.conn_dict.get('host', 'default')])
         match = regex.search(fields_str)
-        flags = match.groups('FLAGS')[0]
-        if flags:
+
+        if match:
+            flags = match.groups('FLAGS')[0]
             return flags[1:].replace(r"\\", "~")
         else:
             return ""

@@ -94,7 +94,7 @@ class ImapReqObject(ValidRequestObject):
 
     accepted_req = {'name': str,
                     'UIDs': list,
-                    'flags': list,
+                    'flags': str,
                     "conn": dict}
 
 

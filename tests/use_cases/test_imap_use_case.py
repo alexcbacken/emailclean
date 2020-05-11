@@ -138,18 +138,6 @@ def test_Imap_Create_New_Mailbox_Use_Case():
     assert bool(response) is True
     assert response.value == ("ok", [])
 
-def test_Imap_Create_New_Folder_Use_Case():
-    imap_client = mock.Mock()
-    imap_client.new_folder.return_value = ("ok", [])
-    folder = "Jerry_2020"
-    Imap_new_folder_UC = imapUC.ImapCreateNewFolderUseCase(imap_client)
-    request = req.ImapReqObject.build(name=folder)
-    response = Imap_new_folder_UC.execute(request)
-    imap_client.new_folder.assert_called_with(folder)
-    assert bool(request) is True
-    assert bool(response) is True
-    assert response.value == ("ok", [])
-
 def test_Imap_Mark_As_Use_Case():
     imap_client = mock.Mock()
     imap_client.mark_as.return_value = ("ok", [])
