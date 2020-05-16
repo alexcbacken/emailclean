@@ -7,7 +7,7 @@ servers. In the future this could be implemented using regex
 """
 
 class Email():
-    def __init__(self, uid, sender, date, subject, receiver, read, flags):
+    def __init__(self, uid, sender, date, subject, receiver, read, flags, mailbox):
         self.uid = uid
         self.sender = sender
         self.date = date
@@ -15,6 +15,7 @@ class Email():
         self.receiver = receiver
         self.read = read
         self.flags = flags
+        self.mailbox = mailbox
 
 
     @classmethod
@@ -26,7 +27,15 @@ class Email():
         cls.receiver = dict["receiver"]
         cls.read = dict["read"]
         cls.flags = dict["flags"]
-        return cls
+        cls.mailbox = dict["mailbox"]
+        return cls(uid=cls.uid,
+                   sender=cls.sender,
+                   date=cls.date,
+                   subject=cls.subject,
+                   receiver=cls.receiver,
+                   read=cls.read,
+                   flags=cls.flags,
+                   mailbox=cls.mailbox)
 
     def as_msg_obj(self):
         raise NotImplementedError('you need to write this!!')

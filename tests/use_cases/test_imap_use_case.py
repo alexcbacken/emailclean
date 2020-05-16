@@ -5,6 +5,7 @@ from emailclean.use_cases import imap_use_cases as imapUC
 from emailclean.domain.email import Email
 from emailclean.servers import imap_server
 from unittest import mock
+import email
 
 
 #fake results, data return list:
@@ -109,7 +110,7 @@ def test_Imap_Fetch_Use_Case(msg_list):
     assert bool(response) is True
     imap_client.fetch.assert_called_with(mailbox)
     for msg in response.value:
-        assert isinstance(msg, type(Email))
+        assert hasattr(msg, '__getitem__')
 
 def test_Imap_Delete_Use_Case(uid_list, expunge_list):
     imap_client = mock.Mock()

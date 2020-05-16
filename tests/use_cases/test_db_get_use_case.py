@@ -166,46 +166,6 @@ def test_Db_delete_db_use_case():
     assert db.delete.called is True
     assert response.value == "ok"
 
-"""
-def test_sender_list_use_case(sender_list):
-    repo = mock.Mock()
-    repo.get.return_value =sender_list
-
-    sender_list_use_case = db_lst.SenderListUseCase(repo)
-    request = req.DbGetReqObject.build(type="sender")
-    response = sender_list_use_case.execute(request)
-
-    assert bool(request) is True
-    assert bool(response) is True
-    repo.get.assert_called_with(type="sender")
-    assert response.value == sender_list
-
-def test_delete_list_use_case(delete_list):
-    repo = mock.Mock()
-    repo.get.return_value =delete_list
-
-    deleted_list_use_case = db_lst.DeleteListUseCase(repo)
-    request = req.DbGetReqObject.build(type="delete")
-    response = deleted_list_use_case.execute(request)
-
-    assert bool(request) is True
-    assert bool(response) is True
-    repo.get.assert_called_with(type="delete")
-    assert response.value == delete_list
-
-def test_count_use_case(count):
-    repo = mock.Mock()
-    repo.get.return_value =count
-
-    count_use_case = db_lst.CountUseCase(repo)
-    request = req.DbGetReqObject.build(type="count")
-    response = count_use_case.execute(request)
-
-    assert bool(request) is True
-    assert bool(response) is True
-    repo.get.assert_called_with(type="count")
-    assert response.value == count
-"""
 
 
 

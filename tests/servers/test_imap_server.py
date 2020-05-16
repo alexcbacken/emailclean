@@ -103,7 +103,10 @@ def test_imap_server_fetch(imap_client, set_mailbox):
     # there are four email in test_inbox.mbox
     assert len(response.value) == 4
     for msg in response.value:
-        assert isinstance(msg, type(Email))
+        assert hasattr(msg, '__getitem__')
+
+
+
 
 
 def test_imap_server_delete(imap_client, set_mailbox, UIDs):

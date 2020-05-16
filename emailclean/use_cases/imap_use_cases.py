@@ -47,13 +47,10 @@ class ImapFetchUseCase:
             return res.ResponseFailure.build_from_invalid_request_object(request)
         try:
             msg_list = self.imap_client.fetch(request.fields.get('name'))
-            for msg in msg_list:
-                email_obj = email.Email.from_dict(msg)
-                email_list.append(email_obj)
         except Exception as e:
             # TODO: add key error handeling (.from_dict method),
             return res.ResponseFailure.build_system_error(f"{e.__class__.__name__}: {e}")
-        return res.ResponseSuccess(email_list)
+        return res.ResponseSuccess(msg_list)
 
 
 class ImapDeleteUseCase:

@@ -70,8 +70,11 @@ class ImapClient():
             result, data = self.connection.uid('FETCH', '1:*', '(FLAGS BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])')
             msg_list = []
             for index in range(0, len(data), 2):
+                # add a mailbox_name columns
+
                 fields_str = data[index][0].decode("utf-8") + data[index + 1].decode("utf-8")
                 email_obj = email.message_from_bytes(data[index][1])
+                email_obj.__setitem__('mailbox', mailbox)
                 email_obj.__setitem__('uid', self._get_UID(fields_str))
                 email_obj.__setitem__('flags', self._get_flags(fields_str))
                 if "Seen" in email_obj['flags']:
