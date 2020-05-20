@@ -26,7 +26,8 @@ def SQLite_data():
         subject="a test email subject",
         receiver="email_clean@gmail.com",
         read=True,
-        flags="//Seen")
+        flags="//Seen",
+        mailbox='inbox')
 
     email_2 = Email(
         uid=2,
@@ -35,7 +36,8 @@ def SQLite_data():
         subject="Welcome to Scouted!",
         receiver="email_clean@gmail.com",
         read=True,
-        flags="//Seen")
+        flags="//Seen",
+        mailbox='inbox')
 
     email_3 = Email(
         uid=3,
@@ -44,7 +46,8 @@ def SQLite_data():
         subject="Caution: Morning Brew coming in hot",
         receiver="email_clean@gmail.com",
         read=False,
-        flags="//Seen")
+        flags="//Seen",
+        mailbox='inbox')
 
     email_4 = Email(
         uid=4,
@@ -53,7 +56,8 @@ def SQLite_data():
         subject="Rotten masks and shared ventilators",
         receiver="email_clean@gmail.com",
         read=True,
-        flags=r"/Answered")
+        flags=r"/Answered",
+        mailbox='inbox')
 
     email_5 = Email(
         uid=5,
@@ -62,7 +66,9 @@ def SQLite_data():
         subject="Trump Removes Watchdog for $2T Virus Bill From Post",
         receiver="email_clean@gmail.com",
         read=False,
-        flags="")
+        flags="",
+        mailbox='inbox')
+
 
     email_6 = Email(
         uid=6,
@@ -71,7 +77,8 @@ def SQLite_data():
         subject="the times alone are the times alone",
         receiver="email_clean@gmail.com",
         read=True,
-        flags="")
+        flags="",
+        mailbox='inbox')
 
     email_7 = Email(
         uid=7,
@@ -80,7 +87,8 @@ def SQLite_data():
         subject="something for everyone",
         receiver="email_clean@gmail.com",
         read=True,
-        flags="")
+        flags="",
+        mailbox='inbox')
     return [email_1,email_2,email_3,email_4,email_5,email_6, email_7]
 
 @pytest.fixture()

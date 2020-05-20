@@ -29,10 +29,9 @@ def session():
 
 def test_db_create(msg_list, session):
     assert session.is_active == True
-    name = "inbox"
     # given a list of email objects and a inbox name, create table
-    result = session.create(msg_list, name)
-    assert name in session.get_bind().table_names()
+    result = session.create(msg_list)
+    assert session.query(email).count() == 7
     assert result == "Success"
 
 def test_multiple_mailbox_create(msg_list, session):

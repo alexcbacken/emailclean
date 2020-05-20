@@ -15,8 +15,7 @@ class DbCreateUseCase:
             return res.ResponseFailure.build_from_invalid_request_object(request)
         try:
             email_list = request.fields.get('msgs')
-            name = request.fields.get('name')
-            result = self.db.create(email_list, name)
+            result = self.db.create(email_list)
         except Exception as e:
             # TODO: add key error handeling (.from_dict method),
             return res.ResponseFailure.build_system_error(f"{e.__class__.__name__}: {e}")

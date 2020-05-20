@@ -17,7 +17,8 @@ def msg_list():
         subject="a test email subject",
         receiver="email_clean@gmail.com",
         read=True,
-        flags=r"/seen")
+        flags=r"/seen",
+        mailbox='inbox')
 
     email_2 = email.Email(
         uid=2,
@@ -26,7 +27,8 @@ def msg_list():
         subject="Welcome to Scouted!",
         receiver="email_clean@gmail.com",
         read=True,
-        flags=r"/seen")
+        flags=r"/seen",
+        mailbox='inbox')
 
     email_3 = email.Email(
         uid=3,
@@ -35,7 +37,8 @@ def msg_list():
         subject="Caution: Morning Brew coming in hot",
         receiver="email_clean@gmail.com",
         read=False,
-        flags=r"/seen")
+        flags=r"/seen",
+        mailbox='inbox')
 
     email_4 = email.Email(
         uid=4,
@@ -44,7 +47,8 @@ def msg_list():
         subject="Rotten masks and shared ventilators",
         receiver="email_clean@gmail.com",
         read=True,
-        flags=r"/answered")
+        flags=r"/answered",
+        mailbox='inbox')
 
     email_5 = email.Email(
         uid=5,
@@ -53,7 +57,8 @@ def msg_list():
         subject="Trump Removes Watchdog for $2T Virus Bill From Post",
         receiver="email_clean@gmail.com",
         read=False,
-        flags="")
+        flags="",
+        mailbox='inbox')
 
     email_6 = email.Email(
         uid=6,
@@ -62,7 +67,8 @@ def msg_list():
         subject="the times alone are the times alone",
         receiver="email_clean@gmail.com",
         read=True,
-        flags="")
+        flags="",
+        mailbox='inbox')
 
     email_6 = email.Email(
         uid=7,
@@ -71,7 +77,8 @@ def msg_list():
         subject="something for everyone",
         receiver="email_clean@gmail.com",
         read=True,
-        flags="")
+        flags="",
+        mailbox='inbox')
     return [email_1,email_2,email_3,email_4,email_5,email_6]
 
 
@@ -124,13 +131,12 @@ def flags():
 def test_Db_create_use_case(msg_list):
     db = mock.Mock()
     db.create.return_value = "ok"
-    name="inbox"
     db_create_use_case = db_uc.DbCreateUseCase(db)
-    request = req.DbRequestObject.build(name=name, msgs=msg_list)
+    request = req.DbRequestObject.build(msgs=msg_list)
     response = db_create_use_case.execute(request)
     assert bool(request) is True
     assert bool(response) is True
-    db.create.assert_called_with(msg_list, name)
+    db.create.assert_called_with(msg_list)
     assert response.value == "ok"
 
 def test_Db_mark_as_use_case(UIDs, flags):
