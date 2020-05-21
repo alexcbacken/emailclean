@@ -11,6 +11,7 @@ Base = declarative_base()
 class email(Base):
     __tablename__ = 'emails'
 
+    mailbox = Column(String, primary_key=True)
     uid = Column(Integer, primary_key=True)
     sender = Column(String)
     date = Column(String)
@@ -18,7 +19,7 @@ class email(Base):
     receiver = Column(String)
     read = Column(Boolean)
     flags = Column(String)
-    mailbox = Column(String)
+
 
     @classmethod
     def from_dict(cls, dict):

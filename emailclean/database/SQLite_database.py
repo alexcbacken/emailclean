@@ -5,6 +5,7 @@ from sqlalchemy.orm.session import Session, sessionmaker
 
 
 ENGINE = create_engine('sqlite://')
+#ENGINE = create_engine('sqlite:///C:\\Users\\Alex\\PycharmProjects\\sql2.db', echo=True)
 Base.metadata.create_all(ENGINE)
 Base.metadata.bind = ENGINE
 
@@ -28,13 +29,24 @@ class SqliteSession(Session):
         :return: "success"
         """
         try:
-            self.add_all([email.from_dict(msg) for msg in messages])
-            #self.add_all(messages)
+            self.add_all(self.render_emails(messages))
             self.commit()
         except Exception as e:
             raise e
         return "Success"
 
+    def render_emails(self, messages):
+        email_list = []
+        for msg in messages:
+            email_list.append(email(mailbox=msg["mailbox"],
+                                    uid=msg["uid"],
+                                    sender=msg["sender"],
+                                    date=msg["date"],
+                                    subject=msg["subject"],
+                                    receiver=msg["receiver"],
+                                    read=msg["read"],
+                                    flags=msg["flags"]))
+        return email_list
 
 
 

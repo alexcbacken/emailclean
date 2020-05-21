@@ -1,7 +1,7 @@
 import pytest
 from emailclean.database.SQLite_objects import email
 from emailclean.database.SQLite_database import SqlliteSessionMaker
-from sqlalchemy import MetaData
+from sqlalchemy import text
 
 
 
@@ -27,24 +27,50 @@ def session():
 
 
 
-def test_db_create(msg_list, session):
+def test_db_create(inbox_email_list, session):
     assert session.is_active == True
     # given a list of email objects and a inbox name, create table
-    result = session.create(msg_list)
+    result = session.create(inbox_email_list)
     assert session.query(email).count() == 7
+    assert session.query(email).filter(email.mailbox == 'inbox').count() == 7
     assert result == "Success"
 
-def test_multiple_mailbox_create(msg_list, session):
-    #this should now just add the second mailbox to this same database. there
-    # is now a column for mailbox
-    name = "inbox"
-    # given a list of email objects and a inbox name, create table
-    result = session.create(msg_list, name)
-    name2 = "mybox"
-    # given a list of email objects and a inbox name, create table
-    result = session.create(msg_list, name2)
-    # run a test for the no of records and the value of the mailbox column
+def test_multiple_mailbox_create(inbox_email_list, mybox_email_list, session):
+    assert session.query(email).count() == 0
+    session.create(mybox_email_list)
+    session.create(inbox_email_list)
+    query = session.query(email)
+    assert query.filter(text('emails.mailbox = "mybox"')).count() == 7
+    assert query.filter(text('emails.mailbox = "inbox"')).count() == 7
+    assert query.filter(email.mailbox == 'inbox').count() == 7
+    assert query.filter(email.mailbox == 'mybox').count() == 7
+    assert query.filter_by(mailbox='inbox').count() == 7
+    assert query.filter_by(mailbox='mybox').count() == 7
 
+
+
+
+
+
+
+
+
+
+    """
+    q =session.query(email)
+
+    for name in q.filter(email.mailbox == 'inbox'):
+        print(name)
+        print(name.mailbox)"""
+
+
+    #assert session.query(email).count() == 14
+
+    """
+    db = session.query(email).all()
+    for x in db:
+        print(x.mailbox, x.uid, x.sender)
+    """
 
 
 
