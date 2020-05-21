@@ -21,24 +21,20 @@ class email(Base):
     flags = Column(String)
 
 
-    @classmethod
-    def from_dict(cls, dict):
-        cls.uid = dict["uid"]
-        cls.sender = dict["sender"]
-        cls.date = dict["date"]
-        cls.subject = dict["subject"]
-        cls.receiver = dict["receiver"]
-        cls.read = dict["read"]
-        cls.flags = dict["flags"]
-        cls.mailbox = dict["mailbox"]
-        return cls(uid=cls.uid,
-                   sender=cls.sender,
-                   date=cls.date,
-                   subject=cls.subject,
-                   receiver=cls.receiver,
-                   read=cls.read,
-                   flags=cls.flags,
-                   mailbox=cls.mailbox)
+def render_emails(messages):
+    email_list = []
+    for msg in messages:
+        email_list.append(email(mailbox=msg["mailbox"],
+                                uid=msg["uid"],
+                                sender=msg["sender"],
+                                date=msg["date"],
+                                subject=msg["subject"],
+                                receiver=msg["receiver"],
+                                read=msg["read"],
+                                flags=msg["flags"]))
+    return email_list
+
+
 
 
 

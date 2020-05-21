@@ -3,8 +3,6 @@ from emailclean.database.SQLite_objects import email
 from emailclean.database.SQLite_database import SqlliteSessionMaker
 from sqlalchemy import text
 
-
-
 @pytest.fixture(scope='function')
 def session():
     """
@@ -17,15 +15,6 @@ def session():
     yield session
     session.close()
     session.get_bind().dispose()
-
-
-
-
-
-
-# test_session_initialisation
-
-
 
 def test_db_create(inbox_email_list, session):
     assert session.is_active == True
@@ -46,36 +35,6 @@ def test_multiple_mailbox_create(inbox_email_list, mybox_email_list, session):
     assert query.filter(email.mailbox == 'mybox').count() == 7
     assert query.filter_by(mailbox='inbox').count() == 7
     assert query.filter_by(mailbox='mybox').count() == 7
-
-
-
-
-
-
-
-
-
-
-    """
-    q =session.query(email)
-
-    for name in q.filter(email.mailbox == 'inbox'):
-        print(name)
-        print(name.mailbox)"""
-
-
-    #assert session.query(email).count() == 14
-
-    """
-    db = session.query(email).all()
-    for x in db:
-        print(x.mailbox, x.uid, x.sender)
-    """
-
-
-
-
-
 
 """
 class DbCreateUseCase:
