@@ -59,7 +59,6 @@ class ValidRequestObject:
 
 class DbRequestObject(ValidRequestObject):
 
-        # should be an iterator containing these items
         accepted_req = {"msgs": list,
                         "flags": list,
                         "UIDs": list,
@@ -70,9 +69,12 @@ class DbGetReqObject(DbRequestObject):
 
     # a accepted kwarg dict. key word is the key. accepted
     # values are accepted values
-    accepted_req = {'get': ['sender', 'all', 'delete'],}
+    accepted_req = {'get': ['by_sender', 'all', 'deleted'],
+                    "name": str}
+
 
     #TODO change to return custom error msg
+    #this overides the Base class method
     @classmethod
     def validate_fields(cls, adict):
         validation = True
@@ -82,9 +84,14 @@ class DbGetReqObject(DbRequestObject):
             error_msg = ("kwargs", "none passed")
         for key in adict:
             try:
-                if adict[key] not in cls.accepted_req[key]:
-                    validation = False
-                    error_msg = (adict[key], "not an expected argument")
+                if key == 'get':
+                    if adict[key] not in cls.accepted_req[key]:
+                        validation = False
+                        error_msg = (adict[key], "not an expected argument")
+                else:
+                    if not isinstance(adict[key], cls.accepted_req.get(key)):
+                        validation = False
+                        error_msg = (adict[key], "not an expected argument")
             except [KeyError, TypeError] as e:
                 validation = False
                 error_msg = (key, str(e))

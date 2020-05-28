@@ -143,22 +143,23 @@ def test_Db_mark_as_use_case(UIDs, flags):
     db = mock.Mock()
     db.mark_as.return_value = "ok"
     db_mark_as_use_case = db_uc.DbMarkAsUseCase(db)
-    request = req.DbRequestObject.build(UIDs=UIDs,flags=flags)
+    name = 'inbox'
+    request = req.DbRequestObject.build(UIDs=UIDs, name='inbox', flags=flags)
     response = db_mark_as_use_case.execute(request)
     assert bool(request) is True
     assert bool(response) is True
-    db.mark_as.assert_called_with(UIDs, flags)
+    db.mark_as.assert_called_with(UIDs, name, flags)
     assert response.value == "ok"
 
 def test_Db_get_use_case(sender_list):
     db = mock.Mock()
     db.get.return_value = sender_list
     db_get_use_case = db_uc.DbGetUseCase(db)
-    request = req.DbGetReqObject.build(get='sender')
+    request = req.DbGetReqObject.build(get='by_sender')
     response = db_get_use_case.execute(request)
     assert bool(request) is True
     assert bool(response) is True
-    db.get.assert_called_with(get='sender')
+    db.get.assert_called_with(get='by_sender')
     assert response.value == sender_list
 
 def test_Db_delete_db_use_case():

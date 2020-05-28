@@ -11,7 +11,8 @@ def msg_list():
         subject="Welcome to Scouted!",
         receiver="email_clean@gmail.com",
         read=True,
-        flags=r"/seen")
+        flags=r"/seen",
+        mailbox="inbox")
     email_3 = email.Email(
         uid=2,
         sender="Daily Beast: Scouted <emails@thedailybeast.com>",
@@ -19,9 +20,10 @@ def msg_list():
         subject="Welcome to Scouted!",
         receiver="email_clean@gmail.com",
         read=True,
-        flags=r"/seen")
-    msg_list = [email_3, email_2]
-    return msg_list
+        flags=r"/seen",
+        mailbox="inbox")
+    return [email_3, email_2]
+
 
 
 
@@ -61,6 +63,13 @@ def test_build_Db_get_request_no_parameters():
     request = req.DbGetReqObject.build()
     assert bool(request) is False
     assert request.errors == {'parameter': 'kwargs', 'problem': 'none passed'}
+
+
+@pytest.mark.parametrize("get_type,expected",[("by_sender", True),("deleted", True),("all", True)])
+def test_build_Db_get_request_correct_parameters(get_type, expected):
+    request = req.DbGetReqObject.build(name="inbox", get=get_type)
+    assert bool(request) is expected
+
 
 
 def test_build_Db_get_request_incorrect_parameter_types():

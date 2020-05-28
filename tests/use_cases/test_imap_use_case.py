@@ -118,9 +118,9 @@ def test_Imap_Delete_Use_Case(uid_list, expunge_list):
     mailbox = "inbox"
 
     Imap_delete_UC = imapUC.ImapDeleteUseCase(imap_client)
-    request = req.ImapReqObject.build(UIDs=uid_list, name=mailbox)
+    request = req.ImapReqObject.build(name=mailbox)
     response = Imap_delete_UC.execute(request)
-    imap_client.delete.assert_called_with(mailbox, uid_list)
+    imap_client.delete.assert_called_with(mailbox)
     assert imap_client.delete.called is True
     assert bool(request) is True
     assert bool(response) is True
@@ -143,14 +143,14 @@ def test_Imap_Mark_As_Use_Case():
     imap_client = mock.Mock()
     imap_client.mark_as.return_value = ("ok", [])
     UIDs = [200,]
-    flags = ['seen',]
+    flags = 'seen'
     mailbox = 'inbox'
     Imap_mark_as_UC = imapUC.ImapMarkAsUseCase(imap_client)
     request = req.ImapReqObject.build(UIDs=UIDs, flags=flags, name=mailbox)
     response = Imap_mark_as_UC.execute(request)
-    imap_client.mark_as.assert_called_with(mailbox, flags, UIDs)
     assert bool(request) is True
     assert bool(response) is True
+    imap_client.mark_as.assert_called_with(mailbox, flags, UIDs)
     assert response.value == ("ok", [])
 
 def test_Imap_Move_To():

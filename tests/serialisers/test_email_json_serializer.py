@@ -9,7 +9,7 @@ from emailclean.domain import email as msg
 def test_serialise_domain_email():
     email = msg.Email(uid=1, sender="alex backen <alexcbacken@gmail.com>",
                       date="Sun, 05 Apr 2020 19:28:21 +0000", subject="a test email subject",
-                      receiver="email_clean@gmail.com", read=True, flags="")
+                      receiver="email_clean@gmail.com", read=True, flags="", mailbox='inbox')
 
     expected_json = """
             {
@@ -19,7 +19,8 @@ def test_serialise_domain_email():
             "subject": "a test email subject",
             "receiver": "email_clean@gmail.com",
             "read": true,
-            "flags": ""
+            "flags": "",
+            "mailbox": "inbox"
             }
         """
 

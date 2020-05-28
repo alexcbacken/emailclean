@@ -213,6 +213,9 @@ def inbox_email_list():
          "mailbox":"inbox"}
         ]
 
+@pytest.fixture
+def flags():
+    return ['seen', 'deleted']
 
 @pytest.fixture(scope='session')
 def SQLite_engine():
@@ -247,11 +250,16 @@ def SQLite_session(SQLite_data,SQLite_session_empty):
     # return a populated SQLlite db
 
 
-    for em in SQLite_data:
-        SQLite_session_empty.add(em)
-        SQLite_session_empty.commit()
+    #or em in SQLite_data:
+    #    SQLite_session_empty.add(em)
+
+    SQLite_session_empty.add_all([email.from_dict(msg) for msg in inbox_email_list])
+
+    SQLite_session_empty.commit()
 
     yield SQLite_session_empty
 
     # delete all the rows, but not the table
     SQLite_session_empty.query(email).delete()
+
+
