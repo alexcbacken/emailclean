@@ -34,7 +34,7 @@ class ImapClient():
     @classmethod
     def connect(cls, conn_dict):
         """
-        Connects to a imap server. SSL shoul dbe True is connecting via a SSL
+        Connects to a imap server. SSL should be True if connecting via a SSL
        connection
 
         :return: a ImapClient object with a imaplib.Imap connection and a

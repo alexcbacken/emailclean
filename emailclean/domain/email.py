@@ -21,16 +21,16 @@ class Email():
     @classmethod
     def from_dict(cls, dict):
         cls.uid = dict["uid"]
-        cls.sender = dict["sender"]
         cls.date = dict["date"]
+        cls.sender = dict["sender"]
         cls.subject = dict["subject"]
         cls.receiver = dict["receiver"]
         cls.read = dict["read"]
         cls.flags = dict["flags"]
         cls.mailbox = dict["mailbox"]
         return cls(uid=cls.uid,
-                   sender=cls.sender,
                    date=cls.date,
+                   sender=cls.sender,
                    subject=cls.subject,
                    receiver=cls.receiver,
                    read=cls.read,

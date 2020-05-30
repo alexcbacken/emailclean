@@ -69,8 +69,7 @@ class DbGetReqObject(DbRequestObject):
 
     # a accepted kwarg dict. key word is the key. accepted
     # values are accepted values
-    accepted_req = {'get': ['by_sender', 'all', 'deleted'],
-                    "name": str}
+    accepted_req = {'get': ['by_sender', 'all', 'deleted']}
 
 
     #TODO change to return custom error msg

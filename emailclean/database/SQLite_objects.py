@@ -22,14 +22,36 @@ class email(Base):
 
     @classmethod
     def from_dict(cls, dict):
-        return cls(mailbox=dict["mailbox"],
-                   uid=dict["uid"],
-                   sender=dict["sender"],
-                   date=dict["date"],
-                   subject=dict["subject"],
-                   receiver=dict["receiver"],
-                   read=dict["read"],
-                   flags=dict["flags"])
+        try:
+            return cls(mailbox=dict["mailbox"],
+                       uid=dict["uid"],
+                       sender=dict["from"],
+                       date=dict["date"],
+                       subject=dict["subject"],
+                       receiver=dict["receiver"],
+                       read=dict["read"],
+                       flags=dict["flags"])
+        except KeyError:
+            return cls(mailbox=dict["mailbox"],
+                       uid=dict["uid"],
+                       # some hosts use 'sender' instead of 'from'
+                       sender=dict["sender"],
+                       date=dict["date"],
+                       subject=dict["subject"],
+                       receiver=dict["receiver"],
+                       read=dict["read"],
+                       flags=dict["flags"])
+
+    @classmethod
+    def from_email_domain_obj(cls, email_obj):
+        return cls(mailbox=email_obj.mailbox,
+                   uid=email_obj.uid,
+                   sender=email_obj.sender,
+                   date=email_obj.date,
+                   subject=email_obj.subject,
+                   receiver=email_obj.receiver,
+                   read=email_obj.read,
+                   flags=email_obj.flags)
 
 
 

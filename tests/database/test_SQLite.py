@@ -37,6 +37,7 @@ def test_db_create(inbox_email_list, unpopulated_session):
     assert unpopulated_session.query(email).filter(email.mailbox == 'inbox').count() == 7
     assert result == "Success"
 
+
 def test_db_multiple_mailbox_create(inbox_email_list, mybox_email_list, unpopulated_session):
     assert unpopulated_session.query(email).count() == 0
     unpopulated_session.create(mybox_email_list)
