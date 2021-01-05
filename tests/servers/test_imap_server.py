@@ -1,7 +1,5 @@
 import pytest
-from imaplib import IMAP4
-from emailclean.domain.email import Email
-from emailclean.servers import imap_server
+from unittest import mock
 from emailclean.use_cases import imap_use_cases as Imap
 from emailclean.requests import request as req
 from emailclean.servers.imap_server import ImapClient
@@ -71,6 +69,12 @@ def imap_client(connection_dict):
     imap_client = ImapClient.connect(connection_dict)
     return imap_client
 
+@pytest.fixture(scope='session')
+def google_fields():
+    return r"138 (UID 170 FLAGS (\Seen) BODY[HEADER.FIELDS (DATE FROM SUBJECT)] {168})"
+
+
+#do not skip this test. it starts localmail, so you need it
 def test_imap_server_connect(connection_dict, start_localmail):
     imapUC = Imap.ImapConnectUseCase()
     request = req.ImapReqObject.build(conn=connection_dict)
@@ -82,7 +86,7 @@ def test_imap_server_connect(connection_dict, start_localmail):
     assert imap_conn.connection.noop() == ('OK', [b'NOOP No operation performed'])
     imap_conn.connection.close()
 
-
+@pytest.mark.skip
 def test_conn_refused_raises_system_error(connection_dict):
     imapUC = Imap.ImapConnectUseCase()
     # set incorrect port
@@ -93,7 +97,7 @@ def test_conn_refused_raises_system_error(connection_dict):
     assert bool(response) is False
     assert response.type == 'SystemError'
 
-
+@pytest.mark.skip
 def test_imap_server_fetch(imap_client, set_mailbox):
     imapUC = Imap.ImapFetchUseCase(imap_client)
     request = req.ImapReqObject.build(name="inbox")
@@ -105,10 +109,7 @@ def test_imap_server_fetch(imap_client, set_mailbox):
     for msg in response.value:
         assert hasattr(msg, '__getitem__')
 
-
-
-
-
+@pytest.mark.skip
 def test_imap_server_delete(imap_client, set_mailbox, UIDs):
     # mark 2 messages for deletion
     flags = '\\Deleted'
@@ -123,19 +124,28 @@ def test_imap_server_delete(imap_client, set_mailbox, UIDs):
     assert bool(response) is True
     assert len(response.value) == 2
 
-
+#@pytest.mark.skip
 def test_imap_mark_as(imap_client, set_mailbox, UIDs):
-    flags = '\\Deleted'
-    imapUC = Imap.ImapMarkAsUseCase(imap_client)
-    request = req.ImapReqObject.build(name="inbox", flags=flags, UIDs=UIDs)
-    response = imapUC.execute(request)
-    assert bool(request) is True
-    assert bool(response) is True
-    assert len(response.value) == 4
-    for item in response.value:
-        assert item[0] in UIDs
-        assert '\\Deleted' in item[1]
+    flags = r'\Deleted'
+    result = imap_client.mark_as("inbox", UIDs, flags=flags)
+    assert result == [(1, '1 (FLAGS (\\Deleted))'),
+ (2, '2 (FLAGS (\\Deleted))'),
+ (3, '3 (FLAGS (\\Deleted))'),
+ (4, '4 (FLAGS (\\Deleted))')]
 
+
+@mock.patch("emailclean.database.SQLite_database.SqliteSession.get")
+def test_imap_mark_as_with_no_flags_value_given(db_mock, imap_client, set_mailbox, UIDs, email_objects):
+    #should take copy of flags from db abstraction.
+    db_mock.return_value = email_objects
+    result = imap_client.mark_as("inbox", UIDs,)
+    assert result == [(1, '1 (FLAGS (\\Seen))'),
+ (2, '2 (FLAGS (\\Seen))'),
+ (3, '3 (FLAGS (\\Seen))'),
+ (4, '4 (FLAGS (\\Answered))')]
+
+
+@pytest.mark.skip
 def test_imap_new_mb(imap_client, set_mailbox):
     imapUC = Imap.ImapCreateNewMailboxUseCase(imap_client)
     request = req.ImapReqObject.build(name="MyBox")
@@ -144,6 +154,8 @@ def test_imap_new_mb(imap_client, set_mailbox):
     assert bool(response) is True
     assert response.value == 'Success'
 
+
+@pytest.mark.skip
 def test_imap_move_to(imap_client,set_mailbox, UIDs):
     # localmail does not implement the copy() command
     # so this test will result in a False response
@@ -152,3 +164,10 @@ def test_imap_move_to(imap_client,set_mailbox, UIDs):
     response = imapUC.execute(request)
     assert bool(request) is True
     assert bool(response) is False
+
+@pytest.mark.skip
+def test_get_flags_on_google_fields(google_fields, imap_client):
+    imap_client.conn_dict['host'] = 'imap.gmail.com'
+    result = imap_client._get_flags(google_fields)
+    assert result == r"\Seen"
+

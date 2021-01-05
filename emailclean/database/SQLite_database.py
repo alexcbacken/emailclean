@@ -40,8 +40,9 @@ class SqliteSession(Session):
         """
 
         try:
+
             result = self.query(email).filter(email.mailbox == mailbox, email.uid.in_(uids)).update(
-                {'flags': '~'.join(flags)},
+                {'flags': flags},
                 synchronize_session=False)
             self.commit()
         except Exception as e:
@@ -55,7 +56,7 @@ class SqliteSession(Session):
         :param get: accepted values: by_sender, all, deleted
         :param mailbox.
         :return: a dictionay. key is name of mailbox. value is a list of tuple pairs (count, sender). with 'count'
-        beinng the number of emails from 'sender'. if 'all' is used, then values are lists of email objects.
+        being the number of emails from 'sender'. if 'all' is used, then values are lists of email objects.
         """
 
         def make_dict(sender_query, distinct_sender):
@@ -98,6 +99,8 @@ class SqliteSession(Session):
         except Exception as e:
             raise e
 
+    def get_uids(self, paramater):
+        pass
 
 class SqlliteSessionMaker(sessionmaker):
     """

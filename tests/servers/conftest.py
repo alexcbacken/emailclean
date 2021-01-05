@@ -1,4 +1,5 @@
 import pytest
+from emailclean.database.SQLite_objects import email
 import threading, sys
 from os import path, remove
 from twisted.logger import Logger, textFileLogObserver
@@ -66,10 +67,49 @@ def set_mailbox():
     yield imaplib.IMAP4
     """
 
-@pytest.fixture(scope='session')
-def mbox_mails():
-    pass
-    #fixture to return hard wired mail box for testing purposes
+@pytest.fixture
+def email_objects():
+    # return a list of SQLite_objects.email objects
+    return {"inbox":[
+            email(uid=1,
+                  sender="alex backen <alexcbacken@gmail.com>",
+                  date="Sun, 05 Apr 2020 19:28:21 +0000",
+                  subject="a test email subject",
+                  receiver="email_clean@gmail.com",
+                  read=True,
+                  flags="\\Seen",
+                  mailbox='inbox'),
+            email(
+                  uid=2,
+                  sender="Daily Beast: Scouted <emails@thedailybeast.com>",
+                  date="Sun, 5 Apr 2020 19:25:56 + 0000(UTC)",
+                  subject="Welcome to Scouted!",
+                  receiver="email_clean@gmail.com",
+                  read=True,
+                  flags="\\Seen",
+                  mailbox='inbox'),
+            email(
+                  uid=3,
+                  sender="Morning Brew <crew@morningbrew.com>",
+                  date="Sun, 5 Apr 2020 19:35:51 +0000 (UTC)",
+                  subject="Caution: Morning Brew coming in hot",
+                  receiver="email_clean@gmail.com",
+                  read=False,
+                  flags="\\Seen",
+                  mailbox='inbox'),
+            email(
+                  uid=4,
+                  sender="Vox Sentences <newsletter@vox.com>",
+                  date="Tue, 07 Apr 2020 08:00:38 +1000",
+                  subject="Rotten masks and shared ventilators",
+                  receiver="email_clean@gmail.com",
+                  read=True,
+                  flags="\\Answered",
+                  mailbox='inbox')
+
+         ]}
+
+
 
 
 

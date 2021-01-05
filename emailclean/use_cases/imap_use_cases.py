@@ -96,7 +96,7 @@ class ImapMarkAsUseCase:
             mailbox = request.fields.get('name')
             flags = request.fields.get('flags')
             UIDs = request.fields.get('UIDs')
-            result = self.imap_client.mark_as(mailbox, flags, UIDs)
+            result = self.imap_client.mark_as(mailbox, UIDs, flags)
         except Exception as e:
             return res.ResponseFailure.build_system_error(f"{e.__class__.__name__}: {e}")
         return res.ResponseSuccess(result)

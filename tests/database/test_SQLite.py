@@ -77,9 +77,6 @@ def test_db_get_deleted(populated_session):
     assert isinstance(result, dict) == True
 
 
-
-
-
 """
 class DbGetUseCase:
             get_type = request.fields.get('get')

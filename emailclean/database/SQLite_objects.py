@@ -8,6 +8,7 @@ Base = declarative_base()
 # from this class SQLAlchemy will create the table "emails" add add it to the
 # email._table_ attribute.
 
+
 class email(Base):
     __tablename__ = 'emails'
 

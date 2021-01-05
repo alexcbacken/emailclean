@@ -1,4 +1,7 @@
 from imaplib import IMAP4_SSL, IMAP4
+from emailclean.database.SQLite_database import ENGINE
+from emailclean.database.SQLite_database import SqliteSession, SqlliteSessionMaker
+from sqlalchemy.orm.session import Session, sessionmaker
 import email
 import re
 
@@ -97,35 +100,55 @@ class ImapClient():
         :return: a list of UIDs that have been deleted
         """
         try:
+            #TODO read this below, implement
+            """This method may not be required, ie gmail expunges instantly. However some servers may not. a check
+            should be done after to see if inbox length is still the same. BUT more likely it is simply enough
+            to flag emails //deleted and let the server clean them up. This will also allow a user to see emails in
+            their deleted file"""
             self.connection.select(mailbox=mailbox)
             result, data = self.connection.expunge()
-            if len(data) == 0:
+            if len(data):
                 raise ValueError('no messages flagged to be deleted run mark_as() first')
         except Exception as e:
             raise e
         return data
 
-    def mark_as(self, mailbox:str, flags:str, UIDs:list):
+    #todo update this so flags can be none. in which case a copy from the db will be added.
+    def mark_as(self, mailbox:str, UIDs:list, flags=""):
         """
         Replace all flags in message with flags in flags string.
         :param mailbox: name on mailbox. ie 'inbox' or 'sent'
-        :param flags: string of flags to be added, seperated by '~'
+        :param flags: string of flags to be added.if ommited, flags will be updated directly from database
         :param UIDs: list of message UIDs that flag will be added to
         :returns a list of (UID, Flags_set) tuples
         """
-        try:
-            # replace ~ in flag string with a single slash and whitespace.
-            flags = flags.replace("~", " \\")
-            return_list = []
-            self.connection.select(mailbox=mailbox)
-            for uid in UIDs:
 
-                # 'FLAGS' is used instead of '+FLAGS' to prevent the need
-                # to maintain info on which emails have had which flags changed
-                # all flags are always replaced with flags in db storage
-                result, data = self.connection.store(str(uid).encode(), 'FLAGS', flags)
-                return_data = data[0].decode()
-                return_list.append((uid, return_data))
+        return_list = []
+
+        def update_flags(uid, flags):
+            # 'FLAGS' is used instead of '+FLAGS' to prevent the need
+            # to maintain info on which emails have had which flags changed
+            # all flags are always replaced with flags presented
+            result, data = self.connection.store(str(uid).encode(), 'FLAGS', flags)
+            return_data = data[0].decode()
+            return_list.append((uid, return_data))
+
+
+        try:
+            self.connection.select(mailbox=mailbox)
+
+            if not flags:
+                """ this breaks the flow for a clean architecture. if you change your db then this method will
+                have to change also. you need to work out a way to call session.get directly. Note also, this test
+                passes as you have mocked the get command. however SQLalchemy might not like this behavour."""
+                session_mkr = SqlliteSessionMaker()
+                session = session_mkr()
+                email_dict = session.get(get="all")
+                for email in email_dict.get(mailbox):
+                    update_flags(email.uid, email.flags)
+            else:
+                for uid in UIDs:
+                    update_flags(uid, flags)
         except Exception as e:
             raise e
         return return_list
@@ -176,18 +199,17 @@ class ImapClient():
         match = re.findall(SERVER_FLAGS_RE_DICT[self.conn_dict.get('host')], flags_str)
         return match
 
-    def _get_flags(self, fields_str):
+    def _get_flags(self, fields_str:str):
         """
-        return flags given a byte string from imap server
+        return flags given a string from imap server
         :param flag_str: the string returned from the imap server
-        :return: a string with flags seperated by "~" ie "Seen~Answered~Deleted"
+        :return: a string with flags seperated  ie "\\Seen \\ Answered \\Deleted"
         """
         regex = re.compile(MSG_FLAGS_RE_DICT[self.conn_dict.get('host', 'default')])
         match = regex.search(fields_str)
 
         if match:
-            flags = match.groups('FLAGS')[0]
-            return flags[1:].replace(r"\\", "~")
+            return match.groups('FLAGS')[0]
         else:
             return ""
 
