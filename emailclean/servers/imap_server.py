@@ -42,6 +42,7 @@ class ImapClient():
 
         :return: a ImapClient object with a imaplib.Imap connection and a
         """
+        #TODO add in google API here, more secure i think
         host = conn_dict.get('host')
         port = conn_dict.get('port')
         email = conn_dict.get('email')
@@ -100,37 +101,50 @@ class ImapClient():
         :return: a list of UIDs that have been deleted
         """
         try:
-            #TODO read this below, implement
-            """This method may not be required, ie gmail expunges instantly. However some servers may not. a check
-            should be done after to see if inbox length is still the same. BUT more likely it is simply enough
-            to flag emails //deleted and let the server clean them up. This will also allow a user to see emails in
-            their deleted file"""
+            print("Removing messages on remote server")
+            #todo check lengh of mailbox as a before
             self.connection.select(mailbox=mailbox)
             result, data = self.connection.expunge()
-            if len(data):
-                raise ValueError('no messages flagged to be deleted run mark_as() first')
+            #TODO return new length of mailbox as an after, so return no of emails deleted
         except Exception as e:
             raise e
         return data
 
-    #todo update this so flags can be none. in which case a copy from the db will be added.
-    def mark_as(self, mailbox:str, UIDs:list, flags=""):
+    def mark_as(self, mailbox:str, UIDs:list, flags=None, replace_flags=True):
         """
-        Replace all flags in message with flags in flags string.
+        Replace all flags in message with flags in flags string. This function can be used to update all flags for a
+        given list of UIDs. In which case the flag strings are taken from the db. it can also be used to update
+        flags to a new string by passing a string in the flags argument
         :param mailbox: name on mailbox. ie 'inbox' or 'sent'
-        :param flags: string of flags to be added.if ommited, flags will be updated directly from database
+        :param flags: string of flags to be added.if ommited, flags will be updated directly from database. Note all
+        flags are replaced
         :param UIDs: list of message UIDs that flag will be added to
+        :param replace_flags: if true flags on server are replaced. if false flags on server are appended to with new
+        flag string. note no checks are carried out to see if email already has flag. ie it is possible to add
+        "\seen' to a email that already has the "\seen" flag. this might cause trouble.
         :returns a list of (UID, Flags_set) tuples
         """
 
         return_list = []
 
-        def update_flags(uid, flags):
+        def update_flags(uid, flag_str):
             # 'FLAGS' is used instead of '+FLAGS' to prevent the need
             # to maintain info on which emails have had which flags changed
             # all flags are always replaced with flags presented
-            result, data = self.connection.store(str(uid).encode(), 'FLAGS', flags)
-            return_data = data[0].decode()
+
+            #result, data = self.connection.store(str(uid).encode(), 'FLAGS', flags.lstrip())
+
+            result, data = self.connection.uid('store', str(uid), 'FLAGS', flag_str.lstrip())
+
+            if data[0]:
+                #TODO make this more of a logging feature
+                return_data = data[0].decode()
+            else:
+                # TODO make this more of a logging feature
+                #TODO if you get a NoneType returned, ping the server again for the msg details and return to user.
+
+                print(f"none type detected {uid}, result: {result}, data: {data}")
+                return_data = flag_str
             return_list.append((uid, return_data))
 
 
@@ -144,9 +158,12 @@ class ImapClient():
                 session_mkr = SqlliteSessionMaker()
                 session = session_mkr()
                 email_dict = session.get(get="all")
+                print(f"No flags received, Updating flags from database")
                 for email in email_dict.get(mailbox):
-                    update_flags(email.uid, email.flags)
+                    if len(email.flags) > 1:
+                        update_flags(email.uid, email.flags)
             else:
+                print(f"flags found Updating flags for {len(UIDs)} emails")
                 for uid in UIDs:
                     update_flags(uid, flags)
         except Exception as e:
@@ -169,6 +186,7 @@ class ImapClient():
         return 'Success'
 
     def move_to(self, mailbox:str, UIDs:list):
+        #TODO add this functionality to the comand line. ie 100 emails from.... delete? or move to?
         """
 
         :param mailbox: Name for destination mailbox. include parent mailboxes also
@@ -180,9 +198,12 @@ class ImapClient():
         return_list = []
         try:
             for uid in UIDs:
+                #this will probably have to be a uid command, as copy requires a message set
+                # result,date = self.connection.uid('copy', str(uid), mailbox) should work
                 result, data = self.connection.copy(str(uid).encode(), mailbox)
                 if result != 'OK':
-                    raise ValueError(f'move unsuccessful check {mailbox} exists')
+                    raise ValueError(f'move unsuccessful, check {mailbox} exists. '
+                                     f'Use connection.new_mb to create new mailbox')
                 return_data = data[0].decode()
                 return_list.append((uid, return_data))
         except Exception as e:

@@ -150,7 +150,7 @@ def test_Imap_Mark_As_Use_Case():
     response = Imap_mark_as_UC.execute(request)
     assert bool(request) is True
     assert bool(response) is True
-    imap_client.mark_as.assert_called_with(mailbox, flags, UIDs)
+    imap_client.mark_as.assert_called_with(mailbox, UIDs, flags)
     assert response.value == ("ok", [])
 
 def test_Imap_Move_To():

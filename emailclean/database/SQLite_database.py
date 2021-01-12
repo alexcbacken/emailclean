@@ -27,6 +27,7 @@ class SqliteSession(Session):
         try:
             self.add_all([email.from_dict(msg) for msg in messages])
             self.commit()
+            print(f"Added {len(messages)} to database")
         except Exception as e:
             raise e
         return "Success"

@@ -185,7 +185,7 @@ def inbox_email_list():
         "subject":"Rotten masks and shared ventilators",
         "receiver":"email_clean@gmail.com",
         "read":True,
-        "flags":"//seen",
+        "flags":"\\seen",
          "mailbox":"inbox"},
         {"uid":5,
         "sender":"Vox Sentences <newsletter@vox.com>",
@@ -193,7 +193,7 @@ def inbox_email_list():
         "subject":"Trump Removes Watchdog for $2T Virus Bill From Post",
         "receiver":"email_clean@gmail.com",
         "read":False,
-        "flags":"//seen",
+        "flags":"\\seen",
          "mailbox":"inbox"},
         {"uid": 6,
          "sender": "Alex Backen <alexcbacken@gmail.com>",
@@ -201,7 +201,7 @@ def inbox_email_list():
          "subject": "the times alone are the times alone",
          "receiver": "email_clean@gmail.com",
          "read": False,
-         "flags": "//seen",
+         "flags": "\\seen",
          "mailbox":"inbox"},
         {"uid": 7,
          "sender": "Alex Backen <alexcbacken@gmail.com>",
@@ -209,13 +209,13 @@ def inbox_email_list():
          "subject": "something for everyone",
          "receiver": "email_clean@gmail.com",
          "read": False,
-         "flags": "//seen",
+         "flags": "\\seen",
          "mailbox":"inbox"}
         ]
 
 @pytest.fixture
 def flags():
-    return ['seen', 'deleted']
+    return r'\seen \deleted'
 
 @pytest.fixture(scope='session')
 def SQLite_engine():

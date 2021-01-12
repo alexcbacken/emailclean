@@ -67,7 +67,7 @@ def test_build_Db_get_request_no_parameters():
 
 @pytest.mark.parametrize("get_type,expected",[("by_sender", True),("deleted", True),("all", True)])
 def test_build_Db_get_request_correct_parameters(get_type, expected):
-    request = req.DbGetReqObject.build(name="inbox", get=get_type)
+    request = req.DbGetReqObject.build(get=get_type)
     assert bool(request) is expected
 
 

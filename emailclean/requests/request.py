@@ -88,7 +88,7 @@ class DbGetReqObject(DbRequestObject):
                         validation = False
                         error_msg = (adict[key], "not an expected argument")
                 else:
-                    if not isinstance(adict[key], cls.accepted_req.get(key)):
+                    if not isinstance(adict[key], type(cls.accepted_req.get(key))):
                         validation = False
                         error_msg = (adict[key], "not an expected argument")
             except [KeyError, TypeError] as e:
